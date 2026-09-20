@@ -1,6 +1,7 @@
 """Tests for envdiff."""
 
 import os
+import subprocess
 import sys
 import tempfile
 from pathlib import Path
@@ -289,3 +290,34 @@ def test_compare_envs_with_nonexistent_file(tmp_path):
     assert only1 == {"KEY1": "value1"}
     assert only2 == {}
     assert diff == {}
+
+
+def test_main_first_file_nonexistent(capsys, tmp_path):
+    """Test main when the FIRST file doesn't exist (covers line 111-112)."""
+    nonexistent = tmp_path / ".env.nonexistent"
+    file2 = tmp_path / ".env2"
+    file2.write_text("KEY=value\n")
+    
+    with pytest.raises(SystemExit) as exc_info:
+        sys.argv = ['envdiff', str(nonexistent), str(file2)]
+        main()
+    
+    assert exc_info.value.code == 1
+    captured = capsys.readouterr()
+    assert "not found" in captured.err
+    assert str(nonexistent.name) in captured.err or str(nonexistent) in captured.err
+
+
+def test_module_as_script(tmp_path):
+    """Test running module as python -m envdiff (covers __main__.py)."""
+    file1 = tmp_path / ".env1"
+    file2 = tmp_path / ".env2"
+    file1.write_text("KEY=value\n")
+    file2.write_text("KEY=different\n")
+    
+    result = subprocess.run(
+        [sys.executable, '-m', 'envdiff', str(file1), str(file2)],
+        capture_output=True, text=True
+    )
+    assert result.returncode == 1  # differences found
+    assert "Different values" in result.stdout

@@ -18,6 +18,13 @@ packages = ["src/envdiff"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+addopts = ["--cov=envdiff", "--cov-report=term-missing"]
+
+[tool.coverage.run]
+omit = ["src/envdiff/__main__.py"]
+
+[tool.coverage.report]
+fail_under = 100
 
 [dependency-groups]
 dev = [
