@@ -3,7 +3,7 @@ name = "envdiff"
 version = "0.1.0"
 description = "Compare .env files across environments and find missing or mismatched keys."
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 dependencies = []
 
 [project.scripts]
